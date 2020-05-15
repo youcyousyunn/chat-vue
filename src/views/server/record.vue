@@ -50,14 +50,14 @@ export default {
     },
     computed: {
         selectedChatEn() {
-            return this.$store.imServerStore.getters.selectedChatEn;
+            return this.$store.serverStore.getters.selectedChatEn;
         },
         // 当前会话列表
         storeCurrentChatEnlist() {
-            return this.$store.imServerStore.getters.currentChatEnlist;
+            return this.$store.serverStore.getters.currentChatEnlist;
         },
         storeServerChatEn() {
-            return this.$store.imServerStore.getters.serverChatEn;
+            return this.$store.serverStore.getters.serverChatEn;
         }
     },
     watch: {},
@@ -67,7 +67,7 @@ export default {
          * @param {Object} en call实体类
          */
         selectChat: function(en) {
-            this.$store.imServerStore.dispatch('selectChat', { clientChatId: en.clientChatId });
+            this.$store.serverStore.dispatch('selectChat', { clientChatId: en.clientChatId });
             this.$emit('selectedChat', {}); // 事件上传
         },
 
@@ -77,7 +77,7 @@ export default {
         toggleFollowIcon: function(en) {
             en.isFollow = !en.isFollow;
             // 排序
-            this.$store.imServerStore.commit('sortCurrentChatEnlist', {});
+            this.$store.serverStore.commit('sortCurrentChatEnlist', {});
         },
 
         /**

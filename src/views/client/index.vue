@@ -5,7 +5,7 @@
             <header class="imClient-header">
                 <div class="name-wrapper position-v-mid">
                     <span v-if="chatInfoEn.chatState == 'robot'">Vue在线客服-访客端</span>
-                    <span v-else-if="chatInfoEn.chatState == 'agent'">您正在与客服{{serverChatEn.serverChatName}}对话</span>
+                    <span v-else-if="chatInfoEn.chatState == 'agent'">您正在与客服{{serverChat.serverChatName}}对话</span>
                 </div>
                 <div class="opr-wrapper position-v-mid">
                     <el-tooltip content="评分" placement="bottom" effect="light">
@@ -56,10 +56,6 @@
                 </div>
             </main>
         </div>
-        <!-- 转接客服dialog -->
-        <el-dialog title="请选择客服" :visible.sync="transferDialogVisible" :close-on-press-escape="false">
-            <im-transfer ref="im_transfer" @submit="transferDialog_submit"></im-transfer>
-        </el-dialog>
         <!-- 满意度dialog -->
         <el-dialog :visible.sync="rateDialogVisible" :close-on-press-escape="false">
             <im-rate ref="im_rate"></im-rate>
@@ -105,15 +101,15 @@ export default {
             clientChat: { // 会话信息，包括聊天记录、状态
                 clientChatId: '',
                 clientChatName: '',
-                avatarUrl: 'static/image/im_client_avatar.png'
+                avatarUrl: '../static/image/im_client_avatar.png'
             },
-            serverChatEn: { // 当前账号的信息
+            serverChat: { // 当前账号的信息
                 serverChatName: '',
                 avatarUrl: ''
             }, 
             robot: { // 服务端chat信息
                 robotName: '小旺',
-                avatarUrl: 'static/image/im_robot_avatar.png'
+                avatarUrl: '../static/image/im_robot_avatar.png'
             }, 
             faqList: [ // 机器人信息
                 { title: '活动页面地址', content: '<a href="https://i.csdn.net/#/uc/draw" target="_blank">https://i.csdn.net/#/uc/drawm</a>' },
@@ -124,14 +120,11 @@ export default {
             selectionRange: null, // 输入框选中的区域
             shortcutMsgList: [], // 聊天区域的快捷回复列表
             logoutDialogVisible: false, // 结束会话显示
-            transferDialogVisible: false, // 转接人工dialog
             rateDialogVisible: false, // 评价dialog
-            websock: {},
             leaveDialogVisible: false // 留言dialog
         }
     },
     created() {
-        this.initWebSocket()
     },
     mounted() {
         this.regClientChat();
@@ -139,29 +132,6 @@ export default {
     computed: {},
     watch: {},
     methods: {
-        initWebSocket: function () {
-            debugger
-            // WebSocket与普通的请求所用协议有所不同，ws等同于http，wss等同于https           
-            const accountId = Math.ceil(Math.random() * 10);     
-            console.log('账号：' + accountId)
-            this.websock = new WebSocket("ws://192.168.199.233:8088/community/socket/" + accountId);
-			this.websock.onopen = this.websocketonopen
-			this.websock.onerror = this.websocketonerror
-			this.websock.onmessage = this.websocketonmessage
-			this.websock.onclose = this.websocketclose
-		},              
-		websocketonopen: function () {
-			console.log("WebSocket连接成功")     
-		},              
-		websocketonerror: function (e) {
-			console.log("WebSocket连接发生错误" + e)
-		},              
-		websocketonmessage: function (e) {
-			console.log("收到服务端消息:"+e.data); 
-		},              
-		websocketclose: function (e) {
-			console.log("connection closed ")
-        },
         /**
          * 注册账号信息
          */
@@ -206,41 +176,43 @@ export default {
          * 注册socket
          * @param {String} serverChatId 服务端chatId
          */
-        regSocket: function(serverChatId) {
-            this.$data.socket = require('socket.io-client')('http://localhost:3001');
-            this.$data.socket.on('connect', () => {
-                // 客户端上线
-                this.$data.socket.emit('CLIENT_ON', {
-                    clientChat: this.$data.clientChat,
-                    serverChatId: serverChatId
-                });
+        regSocket: function() {
+            // WebSocket与普通的请求所用协议有所不同，ws等同于http，wss等同于https           
+            const accountId = Math.ceil(Math.random() * 10);     
+            console.log('账号：' + accountId)
+            this.sock = new WebSocket("ws://192.168.199.233:8088/community/socket/" + accountId);
+			this.sock.onopen = this.websocketonopen
+			this.sock.onerror = this.websocketonerror
+			this.sock.onmessage = this.websocketonmessage
+			this.sock.onclose = this.websocketclose
+            
+            // 离开
+            window.addEventListener('beforeunload', () => {
+                this.closeChat();
+            })
+        },
 
-                // 服务端链接
-                this.$data.socket.on('SERVER_CONNECTED', (data) => {
-                    // 1)获取客服消息
-                    this.$data.serverChatEn = data.serverChatEn;
-
-                    // 2)添加消息
-                    this.addChatMsg({
-                        role: 'sys',
-                        contentType: 'text',
-                        content: '客服 ' + data.serverChatEn.serverChatName + ' 为你服务'
-                    });
-                });
-
-                // 接受服务端信息
-                this.$data.socket.on('SERVER_SEND_MSG', (data) => {
-                    data.msg.avatarUrl = this.$data.serverChatEn.avatarUrl;
-                    this.addChatMsg(data.msg, () => {
-                        this.$refs.common_chat.goEnd();
-                    });
-                });
-
-                // 离开
-                window.addEventListener('beforeunload', () => {
-                    this.closeChat();
-                });
+        websocketonopen: function () {
+            console.log("WebSocket连接成功")
+            // 添加消息
+            this.addChatMsg({
+                role: 'sys',
+                contentType: 'text',
+                content: '客服 ' + data.serverChat.serverChatName + ' 为你服务'
             });
+		},    
+		websocketonerror: function (e) {
+			console.log("WebSocket连接发生错误" + e)
+		},              
+		websocketonmessage: function (e) {
+            console.log("收到服务端消息:"+e.data); 
+            e.data.avatarUrl = this.$data.serverChat.avatarUrl;
+            this.addChatMsg(e.data, () => {
+                this.$refs.common_chat.goEnd();
+            });
+		},              
+		websocketclose: function (e) {
+			console.log("connection closed ")
         },
 
         /**
@@ -250,7 +222,7 @@ export default {
             if (this.$data.chatInfoEn.chatState == 'agent') {
                 this.$data.socket.emit('CLIENT_OFF', {
                     clientChat: this.$data.clientChat,
-                    serverChatId: this.$data.serverChatEn.serverChatId
+                    serverChatId: this.$data.serverChat.serverChatId
                 });
                 this.$data.socket.close();
                 this.$data.chatInfoEn.state = 'off';
@@ -310,7 +282,7 @@ export default {
             } else if (this.$data.chatInfoEn.chatState == 'agent') {
                 // 客服接口
                 this.$data.socket.emit('CLIENT_SEND_MSG', {
-                    serverChatId: this.$data.serverChatEn.serverChatId,
+                    serverChatId: this.$data.serverChat.serverChatId,
                     clientChat: this.$data.clientChat,
                     msg: msg
                 });
@@ -321,27 +293,13 @@ export default {
                 self.goEnd();
             });
         },
-
         /**
          * 显示转接客服Dialog
          */
         transferDialog_show: function() {
-            this.$data.transferDialogVisible = true;
             this.$nextTick(() => {
-                this.$refs.im_transfer.init();
             });
         },
-
-        /**
-         * 转接客服dialog_提交
-         */
-        transferDialog_submit: function(rs) {
-            this.$data.transferDialogVisible = false;
-            this.$data.chatInfoEn.chatState = 'agent';
-            this.regSocket(rs.serverChatId);
-            console.log(rs.serverChatId);
-        },
-
         /**
          * 注销dialog_提交
          */
@@ -352,27 +310,26 @@ export default {
                 content: '本次会话已结束'
             });
         },
-
         /**
          * 注销dialog_取消
          */
         logoutDialog_cancel: function() {
             this.$data.logoutDialogVisible = false;
         },
-
         /**
          * 聊天记录滚动到底部
          */
         goEnd: function() {
             this.$refs.common_chat.goEnd();
         },
-
         /**
          * chat回调
          */
         chatCallback: function(rs) {
+            debugger
             if (rs.eventType == 'transformServer') {
-                this.transferDialog_show();
+                this.$data.chatInfoEn.chatState = 'agent';
+                this.regSocket();
             }
         },
         /**

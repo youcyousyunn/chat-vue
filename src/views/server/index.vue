@@ -1,9 +1,9 @@
-<!-- im服务端入口 -->
+<!-- 服务端入口 -->
 <template>
     <div class="imServer-wrapper">
         <main class="imServer-main">
             <im-record class="item im-record" @selectedChat="selectedChat()"></im-record>
-            <im-chat v-if="storeSelectedChatEn!=null" ref="im_chat" class="item im-chat"></im-chat>
+            <im-chat v-if="selectedChat !== null" ref="im_chat" class="item im-chat"></im-chat>
         </main>
     </div>
 </template>
@@ -23,8 +23,8 @@ export default {
         };
     },
     computed: {
-        storeSelectedChatEn() {
-            return this.$store.imServerStore.getters.selectedChatEn;
+        selectedChat() {
+            return this.$store.serverStore.getters.selectedChat;
         }
     },
     watch: {},
@@ -35,10 +35,10 @@ export default {
         selectedChat: function() {}
     },
     mounted() {
-        this.$store.imServerStore.dispatch('SERVER_ON');
+        this.$store.serverStore.dispatch('SERVER_ON');
     },
     destroyed() {
-        this.$store.imServerStore.dispatch('SERVER_OFF');
+        this.$store.serverStore.dispatch('SERVER_OFF');
     }
 };
 </script>

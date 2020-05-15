@@ -3,7 +3,7 @@
 import Vue from 'vue';
 import App from './App';
 import router from './router';
-import { imServerStore } from './store/imServerStore.js';
+import { serverStore } from './store/serverStore.js';
 // axios
 import http from '@/common/http.js';
 Vue.prototype.$http = http;
@@ -26,7 +26,7 @@ window.polkVue = new Vue({
     router,
     components: { App },
     store: {
-        imServerStore: imServerStore
+        serverStore: serverStore
     },
     template: '<App/>'
 });

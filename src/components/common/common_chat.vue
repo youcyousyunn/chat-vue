@@ -496,7 +496,6 @@ export default {
                 }
             });
         },
-
         /**
          * 传递回调
          */
@@ -506,7 +505,6 @@ export default {
                 data: data
             });
         },
-
         /**
          * 聊天记录滚动到底部
          */

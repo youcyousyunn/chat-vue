@@ -3,14 +3,14 @@
     <div class="imChat-wrapper">
         <!-- 头部 -->
         <header class="imChat-header">
-            <span class="name">{{storeSelectedChatEn.clientChatName}}</span>
-            <span class="time">{{getAccessTimeStr(storeSelectedChatEn.accessTime)}}</span>
-            <span v-show="storeSelectedChatEn.state=='on' " class="on-line">在线</span>
-            <span v-show="storeSelectedChatEn.state=='off' " class="off-line ">离线</span>
+            <span class="name">{{selectedChat.clientChatName}}</span>
+            <span class="time">{{getAccessTimeStr(selectedChat.accessTime)}}</span>
+            <span v-show="selectedChat.state=='on' " class="on-line">在线</span>
+            <span v-show="selectedChat.state=='off' " class="off-line ">离线</span>
         </header>
         <main class="imChat-main">
             <!-- 聊天框区域 -->
-            <common-chat ref="common_chat" :chatInfoEn="storeSelectedChatEn" :oprRoleName="'server'" @sendMsg="sendMsg"></common-chat>
+            <common-chat ref="common_chat" :chatInfoEn="selectedChat" :oprRoleName="'server'" @sendMsg="sendMsg"></common-chat>
         </main>
     </div>
 </template>
@@ -26,18 +26,18 @@ export default {
         return {};
     },
     computed: {
-        storeSelectedChatEn() {
-            return this.$store.imServerStore.getters.selectedChatEn;
+        selectedChat() {
+            return this.$store.serverStore.getters.selectedChat;
         },
         storeHaveNewMsgDelegate() {
-            return this.$store.imServerStore.getters.haveNewMsgDelegate;
+            return this.$store.serverStore.getters.haveNewMsgDelegate;
         },
         storeServerChatEn() {
-            return this.$store.imServerStore.getters.serverChatEn;
+            return this.$store.serverStore.getters.serverChatEn;
         }
     },
     watch: {
-        storeSelectedChatEn(value) {
+        selectedChat(value) {
             this.$refs.common_chat.goEnd();
         },
         storeHaveNewMsgDelegate(value) {
@@ -54,14 +54,14 @@ export default {
             msg.role = 'server';
             msg.avatarUrl = this.storeServerChatEn.avatarUrl;
             // 1.socket发送消息
-            this.$store.imServerStore.dispatch('sendMsg', {
-                clientChatId: this.storeSelectedChatEn.clientChatId,
+            this.$store.serverStore.dispatch('sendMsg', {
+                clientChatId: this.selectedChat.clientChatId,
                 msg: msg
             });
 
             // 2.附加到此chat对象的msg集合里
-            this.$store.imServerStore.dispatch('addChatMsg', {
-                clientChatId: this.storeSelectedChatEn.clientChatId,
+            this.$store.serverStore.dispatch('addChatMsg', {
+                clientChatId: this.selectedChat.clientChatId,
                 msg: msg,
                 successCallback: function() {
                     rs.successCallbcak && rs.successCallbcak();
