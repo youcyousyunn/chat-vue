@@ -47,7 +47,7 @@
                                     <div v-if="item.contentType=='transformServer'" class="item-content common_chat_emoji-wrapper-global">
                                         <p class="text">
                                             当前没有配置机器人，
-                                            <el-button type="text" @click="chatCallback('transformServer')">转接客服</el-button>
+                                            <el-button type="text" @click="chatService('transformServer')">转接客服</el-button>
                                         </p>
                                     </div>
                                 </div>
@@ -496,11 +496,12 @@ export default {
                 }
             });
         },
+
         /**
-         * 传递回调
+         * 转接客服
          */
-        chatCallback: function(emitType, data) {
-            this.$emit('chatCallback', {
+        chatService: function(emitType, data) {
+            this.$emit('chatServiceCallback', {
                 eventType: emitType,
                 data: data
             });
