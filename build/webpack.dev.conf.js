@@ -82,8 +82,8 @@ module.exports = new Promise((resolve, reject) => {
                         messages: [
                             `
 Your application is running here:
-    im-server:  http://localhost:${port}/#/imServer
-    im-client:  http://localhost:${port}/#/imclient
+    服务端:  http://localhost:${port}/chat/server
+    客户端:  http://localhost:${port}/chat/client
                         `
                         ]
                     },
