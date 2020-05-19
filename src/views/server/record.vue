@@ -3,17 +3,17 @@
     <div class="imRecord-wrapper">
         <header class="header">
             <div class="kf-info-wrapper">
-                <img class="kf-avatar" :src="storeServerChatEn.avatarUrl" />
-                <span class="kf-name position-h-v-mid">{{storeServerChatEn.serverChatName}}</span>
+                <img class="kf-avatar" :src="serverChat.avatarUrl" />
+                <span class="kf-name position-h-v-mid">{{serverChat.serverChatName}}</span>
             </div>
             <div class="client-info-wrapper">
                 <p>
-                    <i class="fa fa-user on-line"></i>{{storeCurrentChatEnlist.length}}</p>
+                    <i class="fa fa-user on-line"></i>{{currentChatList.length}}</p>
             </div>
         </header>
         <main class="main">
-            <div v-if="storeCurrentChatEnlist.length>0" class="item-list">
-                <div class="item" v-for="(tmpEn, index) in storeCurrentChatEnlist" :key="index" @click="selectChat(tmpEn)" v-bind:class="{ active: selectedChatEn!=null && tmpEn.clientChatId==selectedChatEn.clientChatId}">
+            <div v-if="currentChatList.length>0" class="item-list">
+                <div class="item" v-for="(tmpEn, index) in currentChatList" :key="index" @click="selectChat(tmpEn)" v-bind:class="{ active: selectedChat!=null && tmpEn.clientChatId==selectedChat.clientChatId}">
                     <div class="followicon-wrapper">
                         <i class="iconfont icon-zhidingwujiaoxing position-h-v-mid" :class="{ active: tmpEn.isFollow}" @click.stop="toggleFollowIcon(tmpEn)"></i>
                     </div>
@@ -33,7 +33,7 @@
                     </div>
                 </div>
             </div>
-            <div v-else-if="storeCurrentChatEnlist.length==0" class="empty-wrapper">
+            <div v-else-if="currentChatList.length==0" class="empty-wrapper">
                 <div class="content">
                     <i class="iconfont fa fa-commenting-o"></i>
                     <p class="title">当前没有会话</p>
@@ -46,29 +46,29 @@
 <script>
 export default {
     data() {
-        return {};
+        return {}
     },
     computed: {
-        selectedChatEn() {
-            return this.$store.serverStore.getters.selectedChatEn;
-        },
         // 当前会话列表
-        storeCurrentChatEnlist() {
-            return this.$store.serverStore.getters.currentChatEnlist;
+        currentChatList() {
+            return this.$store.state.chat.currentChatList
         },
-        storeServerChatEn() {
-            return this.$store.serverStore.getters.serverChatEn;
+        // 选中聊天对象
+        selectedChat() {
+            return this.$store.getters.selectedChat
+        },
+        // 客服
+        serverChat() {
+            return this.$store.getters.serverChat
         }
     },
     watch: {},
     methods: {
         /**
-         * 选中当前列表的chat
-         * @param {Object} en call实体类
+         * 选中聊天列表的聊天chat
          */
         selectChat: function(en) {
-            this.$store.serverStore.dispatch('selectChat', { clientChatId: en.clientChatId });
-            this.$emit('selectedChat', {}); // 事件上传
+            this.$store.dispatch('chat/selectChat', { clientChatId: en.clientChatId })
         },
 
         /**
@@ -77,7 +77,7 @@ export default {
         toggleFollowIcon: function(en) {
             en.isFollow = !en.isFollow;
             // 排序
-            this.$store.serverStore.commit('sortCurrentChatEnlist', {});
+            this.$store.commit('chat/sortCurrentChatEnlist', {});
         },
 
         /**
@@ -117,7 +117,7 @@ export default {
         border-bottom: 1px solid #e6e6e6;
         .kf-info-wrapper {
             position: relative;
-            width: 150px;
+            width: 200px;
             height: 50px;
             padding: 0 20px;
             .kf-avatar {
@@ -125,7 +125,7 @@ export default {
                 height: 50px;
             }
             .kf-name {
-                font-size: 16px;
+                font-size: 14px;
             }
         }
         .client-info-wrapper {

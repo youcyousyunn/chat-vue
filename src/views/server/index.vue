@@ -2,7 +2,7 @@
 <template>
     <div class="imServer-wrapper">
         <main class="imServer-main">
-            <im-record class="item im-record" @selectedChat="selectedChat()"></im-record>
+            <im-record class="item im-record"></im-record>
             <im-chat v-if="selectedChat !== null" ref="im_chat" class="item im-chat"></im-chat>
         </main>
     </div>
@@ -24,21 +24,42 @@ export default {
     },
     computed: {
         selectedChat() {
-            return this.$store.serverStore.getters.selectedChat;
+            return this.$store.getters.selectedChat
         }
     },
     watch: {},
-    methods: {
-        /**
-         * 选中了会话
-         */
-        selectedChat: function() {}
-    },
     mounted() {
-        this.$store.serverStore.dispatch('SERVER_ON');
+        this.regSocket()
+    },
+    methods: {
+        regSocket() {
+            this.socket = new WebSocket("ws://192.168.199.233:8088/community/socket/" + 9527);
+			this.socket.onopen = this.websocketonopen
+			this.socket.onerror = this.websocketonerror
+			this.socket.onmessage = this.websocketonmessage
+			this.socket.onclose = this.websocketclose
+        },
+        websocketonopen: function () {
+            console.log("WebSocket连接成功")
+		},    
+		websocketonerror: function (e) {
+			console.log("WebSocket连接发生错误" + e)
+		},              
+		websocketonmessage: function (e) {
+            console.log("收到服务端消息:"+e.data)
+            const data = JSON.parse(e.data)
+            if(data.status === 'OPEN') { // 客户端上线通知
+                this.$store.dispatch('chat/CLIENT_ON', JSON.parse(e.data))
+            } else {
+
+            }
+		},              
+		websocketclose: function (e) {
+			console.log("connection closed ")
+        }
     },
     destroyed() {
-        this.$store.serverStore.dispatch('SERVER_OFF');
+        this.$store.dispatch('chat/SERVER_OFF');
     }
 };
 </script>

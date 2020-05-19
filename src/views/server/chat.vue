@@ -23,17 +23,17 @@ export default {
         commonChat: commonChat
     },
     data() {
-        return {};
+        return {}
     },
     computed: {
         selectedChat() {
-            return this.$store.serverStore.getters.selectedChat;
+            return this.$store.getters.selectedChat
         },
         storeHaveNewMsgDelegate() {
-            return this.$store.serverStore.getters.haveNewMsgDelegate;
+            return this.$store.getters.haveNewMsgDelegate
         },
-        storeServerChatEn() {
-            return this.$store.serverStore.getters.serverChatEn;
+        serverChat() {
+            return this.$store.getters.serverChat
         }
     },
     watch: {
@@ -47,20 +47,19 @@ export default {
     methods: {
         /**
          * 发送消息
-         * @param {Object} rs 回调对象
          */
         sendMsg: function(rs) {
             var msg = rs.msg;
             msg.role = 'server';
-            msg.avatarUrl = this.storeServerChatEn.avatarUrl;
+            msg.avatarUrl = this.serverChat.avatarUrl;
             // 1.socket发送消息
-            this.$store.serverStore.dispatch('sendMsg', {
+            this.$store.dispatch('chat/sendMsg', {
                 clientChatId: this.selectedChat.clientChatId,
                 msg: msg
             });
 
-            // 2.附加到此chat对象的msg集合里
-            this.$store.serverStore.dispatch('addChatMsg', {
+            // 2.添加此消息到该chat对象的消息集合里
+            this.$store.dispatch('chat/addChatMsg', {
                 clientChatId: this.selectedChat.clientChatId,
                 msg: msg,
                 successCallback: function() {
@@ -68,14 +67,12 @@ export default {
                 }
             });
         },
-
         goEnd: function() {
             this.$refs.common_chat.goEnd();
         },
 
         /**
          * 获取chat的访问时间
-         * @param {Date} accessTime 问时间
          */
         getAccessTimeStr: function(accessTime) {
             return this.$ak.Utils.getDateTimeStr(accessTime, 'Y-m-d H:i:s');
