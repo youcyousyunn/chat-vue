@@ -1,92 +1,77 @@
-import Vue from 'vue';
-import axios from 'axios';
+import axios from 'axios'
+import { Notification } from 'element-ui'
 
-var axiosInstance = axios.create({
-    baseURL: location.origin.replace(/:\d+/, ':3000'),
-    timeout: 1000 * 5
-});
+const service = axios.create({
+  baseURL: process.env.BASE_API,
+  timeout: 1000*60,
+  withCredentials: true
+})
 
-axiosInstance.interceptors.request.use(
-    function(config) {
-        // Do something before request is sent
-        return config;
-    },
-    function(error) {
-        // Do something with request error
-        return Promise.reject(error);
-    }
-);
+service.interceptors.request.use(
+  config => {
+    return config
+  },
+  error => {
+    console.log(error)
+    return Promise.reject(error)
+  }
+)
 
-/**
- * http请求响应处理函数
- */
-var httpResponseHandle = function() {
-    var self = this;
-    if (self.res.code == '0') {
-        self.successCallback && self.successCallback(self.res.data);
+service.interceptors.response.use(
+  response => {
+    const code = response.status
+    if (code < 200 || code > 300) {
+      Notification.error({
+        title: response.message
+      })
     } else {
-        self.failCallback && self.failCallback(self.res.data);
+      return response.data
     }
-};
-
-var http = {
-    /**
-     * 以get方式请求获取JSON数据
-     * @param {Object} opts 配置项，可包含以下成员:
-     * @param {String} opts.url 请求地址
-     * @param {Object} opts.params 附加的请求参数
-     * @param {Function} opts.successCallback 成功接收内容时的回调函数
-     */
-    get: function(opts) {
-        if (opts.params) {
-            opts.url = opts.url + '?' + this.toQueryString(opts.params);
-        }
-        axiosInstance
-            .get(opts.url, { params: opts.params })
-            .then(function(res) {
-                opts.res = res.data;
-                httpResponseHandle.call(opts);
-            })
-            .catch(function(err) {});
-    },
-
-    /**
-     * 以get方式请求获取JSON数据
-     * @param {Object} opts 配置项，可包含以下成员:
-     * @param {String} opts.url 请求地址
-     * @param {Object} opts.params 附加的请求参数
-     * @param {Function} opts.successCallback 成功接收内容时的回调函数
-     */
-    post: function(opts) {
-        axiosInstance
-            .post(opts.url, opts.params)
-            .then(function(res) {
-                opts.res = res.data;
-                httpResponseHandle.call(opts);
-            })
-            .catch(function(err) {});
-    },
-
-    /**
-     * 上传文件
-     * @param {Object} opts 配置项，可包含以下成员:
-     * @param {String} opts.url 请求地址
-     * @param {Object} opts.params 上传的参数
-     * @param {Function} opts.successCallback 成功接收内容时的回调函数
-     */
-    uploadFile: function(opts) {
-        axiosInstance
-            .post('/upload', opts.params, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            })
-            .then(function(res) {
-                opts.res = res.data;
-                httpResponseHandle.call(opts);
-            })
-            .catch(function() {});
+  },
+  error => {
+    let code = 0
+    try {
+      code = error.response.data.status
+    } catch (e) {
+      if (error.toString().indexOf('Error: timeout') !== -1) {
+        Notification.error({
+          title: '网络请求超时',
+          duration: 2500
+        })
+        return Promise.reject(error)
+      }
+      if (error.toString().indexOf('Error: Network Error') !== -1) {
+        Notification.error({
+          title: '网络请求错误',
+          duration: 2500
+        })
+        return Promise.reject(error)
+      }
     }
-};
+    if (code === 400) {
+      const errorMsg = error.response.data.msg
+      if (errorMsg) {
+        Notification.error({
+          title: errorMsg,
+          duration: 2500
+        })
+      } else {
+        Notification.error({
+          title: '服务器忙不过来了',
+          duration: 2500
+        })
+      }
+    } else {
+      const errorMsg = error.response.data.message
+      if (errorMsg) {
+        Notification.error({
+          title: errorMsg,
+          duration: 2500
+        })
+      }
+    }
+    return Promise.reject(error)
+  }
+)
 
-export default http;
+export default service
