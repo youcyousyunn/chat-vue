@@ -46,12 +46,15 @@ export default {
 			console.log("WebSocket连接发生错误" + e)
 		},              
 		websocketonmessage: function (e) {
-            console.log("收到服务端消息:"+e.data)
             const data = JSON.parse(e.data)
-            if(data.status === 'OPEN') { // 客户端上线通知
-                this.$store.dispatch('chat/CLIENT_ON', JSON.parse(e.data))
+            if(data.status === 'OPEN') {
+                if(data.role === 'SERVER') { // 服务端上线
+                    this.$store.dispatch('chat/SERVER_ON', data)
+                } else { // 客户端上线通知
+                    this.$store.dispatch('chat/CLIENT_ON', data)
+                }
             } else {
-
+                this.$store.dispatch('chat/CLIENT_SEND_MSG', data)
             }
 		},              
 		websocketclose: function (e) {

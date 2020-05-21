@@ -49,37 +49,37 @@ export default {
          * 发送消息
          */
         sendMsg: function(rs) {
-            var msg = rs.msg;
-            msg.role = 'server';
-            msg.avatarUrl = this.serverChat.avatarUrl;
+            const msg = {
+                clientId: this.selectedChat.clientChatId,
+                role: 'SERVER',
+                serviceAvatarUrl: this.serverChat.avatarUrl,
+                content: rs.msg.content,
+                contentType: rs.msg.contentType
+            }
             // 1.socket发送消息
-            this.$store.dispatch('chat/sendMsg', {
-                clientChatId: this.selectedChat.clientChatId,
-                msg: msg
-            });
+            this.$store.dispatch('chat/serverSendMsg', {msg})
 
             // 2.添加此消息到该chat对象的消息集合里
             this.$store.dispatch('chat/addChatMsg', {
                 clientChatId: this.selectedChat.clientChatId,
                 msg: msg,
                 successCallback: function() {
-                    rs.successCallbcak && rs.successCallbcak();
+                    rs.successCallbcak && rs.successCallbcak()
                 }
-            });
+            })
         },
         goEnd: function() {
-            this.$refs.common_chat.goEnd();
+            this.$refs.common_chat.goEnd()
         },
 
         /**
          * 获取chat的访问时间
          */
         getAccessTimeStr: function(accessTime) {
-            return this.$ak.Utils.getDateTimeStr(accessTime, 'Y-m-d H:i:s');
+            return this.$ak.Utils.getDateTimeStr(accessTime, 'Y-m-d H:i:s')
         }
-    },
-    mounted() {}
-};
+    }
+}
 </script>
 <style lang="less">
 .imChat-wrapper {
