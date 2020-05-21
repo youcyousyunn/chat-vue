@@ -6,7 +6,7 @@
             <div class="common_chat-main" id="common_chat_main" ref="common_chat_main">
                 <div class="common_chat-main-content">
                     <div class="inner">
-                        <div v-for="(item ,index) in chatInfoEn.msgList" :key="index">
+                        <div v-for="(item ,index) in chatInfo.msgList" :key="index">
                             <!-- 系统消息 -->
                             <div v-if="item.role=='sys'" class="item sys">
                                 <!-- 1)文本类型 -->
@@ -84,10 +84,10 @@
                         ></div>
                     </div>
                     <!-- 发送按钮 -->
-                    <el-button type="primary" size="small" class="send-btn" :class="chatInfoEn.state" @click="sendText()" :disabled="chatInfoEn.inputContent.length==0">发送</el-button>
+                    <el-button type="primary" size="small" class="send-btn" :class="chatInfo.state" @click="sendText()" :disabled="chatInfo.inputContent.length==0">发送</el-button>
                 </div>
                 <!-- 离线 -->
-                <div v-show="chatInfoEn.state=='off' || chatInfoEn.state=='end'" class="off-wrapper">
+                <div v-show="chatInfo.state=='off' || chatInfo.state=='end'" class="off-wrapper">
                     <span class="content">会话已经结束</span>
                 </div>
             </div>
@@ -106,13 +106,12 @@
 
 <script>
 import common_chat_emoji from './common_chat_emoji.vue';
-
 export default {
     components: {
         commonChatEmoji: common_chat_emoji
     },
     props: {
-        chatInfoEn: {
+        chatInfo: {
             required: true,
             type: Object,
             default: {
@@ -137,6 +136,11 @@ export default {
     },
     computed: {},
     watch: {},
+    mounted() {
+        this.$nextTick(function() {
+            this.init()
+        });
+    },
     methods: {
         /**
          * 初始化
@@ -149,15 +153,15 @@ export default {
             self.$refs.qqemoji.$data.faceHidden = true;
 
             // 在线状态
-            if (this.chatInfoEn.state == 'on') {
+            if (this.chatInfo.state == 'on') {
                 // 1.显示在输入框的内容
                 setTimeout(function() {
                     // 未断开获取焦点
                     document.getElementById('common_chat_input').focus();
                     self.setInputContentSelectRange();
                     // 设置之前保存的输入框内容
-                    if (self.chatInfoEn.inputContent) {
-                        self.setInputDiv(self.chatInfoEn.inputContent);
+                    if (self.chatInfo.inputContent) {
+                        self.setInputDiv(self.chatInfo.inputContent);
                     }
                 }, 200);
             } else {
@@ -176,10 +180,10 @@ export default {
          */
         sendText: function() {
             var self = this;
-            if (self.chatInfoEn.inputContent.length == '') {
+            if (self.chatInfo.inputContent.length == '') {
                 return;
             }
-            var msgContent = self.chatInfoEn.inputContent;
+            var msgContent = self.chatInfo.inputContent;
             document.getElementById('common_chat_input').innerHTML = '';
             self.setInputContentByDiv();
 
@@ -210,7 +214,7 @@ export default {
             }
 
             // 3.修改store
-            this.chatInfoEn.inputContent = tmpInputContent;
+            this.chatInfo.inputContent = tmpInputContent;
         },
 
         /**
@@ -506,21 +510,17 @@ export default {
                 data: data
             });
         },
+
         /**
          * 聊天记录滚动到底部
          */
         goEnd: function() {
             this.$nextTick(() => {
                 setTimeout(() => {
-                    this.$refs.common_chat_main.scrollTop = this.$refs.common_chat_main.scrollHeight;
-                }, 100);
-            });
+                    this.$refs.common_chat_main.scrollTop = this.$refs.common_chat_main.scrollHeight
+                }, 100)
+            })
         }
-    },
-    mounted() {
-        this.$nextTick(function() {
-            this.init();
-        });
     }
 };
 </script>
