@@ -177,7 +177,6 @@ export default {
                     break
                 default:
                     break
-
             }
             msgList.push(msg)
 

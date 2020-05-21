@@ -217,6 +217,17 @@ const actions = {
                 chat.lastMsgShowTime = msg.createTime
             }
 
+            switch(msg.role) { // 根据角色转换头像属性
+                case 'SERVER':
+                    msg.avatarUrl = msg.serviceAvatarUrl
+                    break
+                case 'CLIENT':
+                    msg.avatarUrl = msg.clientAvatarUrl
+                    break
+                default:
+                    break
+            }
+
             // 2.插入消息
             msgList.push(msg)
 
@@ -251,12 +262,12 @@ const actions = {
             context.commit('sortCurrentChatlist', {})
 
             // 6.加入通知
-            if (msg.role == 'CLIENT' && msg.contentType != 'preInput') {
+            // if (msg.role == 'CLIENT' && msg.contentType != 'preInput') {
                 context.dispatch('addNotificationChat', {
                     chat: chat,
                     oprType: 'msg'
                 })
-            }
+            // }
 
             // 7.回调
             successCallback && successCallback()

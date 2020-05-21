@@ -1,24 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import server from '@/components/imServer/imServer'
-import client from '@/components/imClient/imClient'
-
 Vue.use(Router)
 
 export const constantRoutes = [
     {
         path: '/',
         redirect: 'server'
-    },
-    {
-        path: '/imserver',
-        name: 'server',
-        component: server
-    },
-    {
-        path: '/imclient',
-        name: 'client',
-        component: client
     },
     {
         path: '/server',
