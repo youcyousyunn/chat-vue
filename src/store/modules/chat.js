@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import ak from '@/common/ak.js'
-import {send} from '@/api/api.js'
+import { serverSendMsg, clientSendMsg } from '@/api/api.js'
 
 const state =  {
     socket: null,
@@ -78,8 +78,8 @@ const actions = {
      */
     SERVER_ON: function(context, payload) {
         state.serverChat = {
-            serverChatId: payload.from,
-            serverChatName: payload.nickname,
+            serverChatId: payload.serviceId,
+            serverChatName: payload.serviceName,
             avatarUrl: '/static/image/im_server_avatar.png'
         }
     },
@@ -100,6 +100,39 @@ const actions = {
             newChat: {
                 clientChatId: payload.clientId,
                 clientChatName: payload.clientName
+            }
+        })
+    },
+
+    /**
+     * 客户端发送了消息
+     */
+    CLIENT_SEND_MSG: function(context, payload) {
+        context.dispatch('addChatMsg', {
+            clientChatId: payload.clientId,
+            msg: payload
+        })
+    },
+
+    /**
+     * 客户端离线
+     */
+    CLIENT_OFF: function(context, payload) {
+        // 1.修改客户状态为离线
+        context.dispatch('extendChat', {
+            clientChatId: payload.clientChat.clientChatId,
+            extends: {
+                state: 'off'
+            }
+        })
+
+        // 2.添加消息
+        context.dispatch('addChatMsg', {
+            clientChatId: payload.clientChat.clientChatId,
+            msg: {
+                role: 'sys',
+                contentType: 'text',
+                content: '客户断开连接'
             }
         });
     },
@@ -171,7 +204,6 @@ const actions = {
             if (chat == null) {
                 return
             }
-
             // 1.消息设定
             var msgList = chat.msgList ? chat.msgList : []
             msg.createTime = msg.createTime == undefined ? new Date() : msg.createTime
@@ -219,7 +251,7 @@ const actions = {
             context.commit('sortCurrentChatlist', {})
 
             // 6.加入通知
-            if (msg.isNewMsg && msg.role == 'client' && msg.contentType != 'preInput') {
+            if (msg.role == 'CLIENT' && msg.contentType != 'preInput') {
                 context.dispatch('addNotificationChat', {
                     chat: chat,
                     oprType: 'msg'
@@ -384,15 +416,19 @@ const actions = {
     },
 
     /**
-     * 发送消息
+     * 客服发送消息
      */
-    sendMsg: function(context, { clientChatId, msg }) {
-        console.log('发送人: ' + clientChatId)
-        const data = {
-            clientId: clientChatId,
-            msg: msg.content
-        }
-        send(data).then(res => {
+    serverSendMsg: function(context, payload) {
+        serverSendMsg(payload.msg).then(res => {
+            console.log('发送成功')
+        })
+    },
+
+    /**
+     * 客户端发送消息
+     */
+    clientSendMsg: function(context, payload) {
+        clientSendMsg(payload.msg).then(res => {
             console.log('发送成功')
         })
     }
