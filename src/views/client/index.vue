@@ -101,16 +101,16 @@ export default {
             clientChat: { // 当前账号的信息
                 clientChatId: '',
                 clientChatName: '',
-                avatarUrl: '/static/image/im_client_avatar.png'
+                avatarUrl: require('../../assets/image/im_client_avatar.png')
             },
             serverChat: { // 服务端chat信息
                 serverChatId: '',
                 serverChatName: '',
-                avatarUrl: '/static/image/im_server_avatar.png'
+                avatarUrl: require('../../assets/image/im_server_avatar.png')
             }, 
             robot: { // 机器人信息
                 robotName: '小旺',
-                avatarUrl: '/static/image/im_robot_avatar.png'
+                avatarUrl: require('../../assets/image/im_robot_avatar.png')
             }, 
             faqList: [ // 常见问题一览
                 { title: '活动页面地址', content: '<a href="https://i.csdn.net/#/uc/draw" target="_blank">https://i.csdn.net/#/uc/drawm</a>' },

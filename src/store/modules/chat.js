@@ -7,7 +7,7 @@ const state =  {
     serverChat: {
         serverChatId: Number.parseInt(Date.now() + Math.random()),
         serverChatName: '小爱',
-        avatarUrl: '/static/image/im_server_avatar.png'
+        avatarUrl: require('../../assets/image/im_server_avatar.png')
     },
     selectedChat: null, // 选取的会话对象
     currentChatList: [
@@ -80,7 +80,7 @@ const actions = {
         state.serverChat = {
             serverChatId: payload.serviceId,
             serverChatName: payload.serviceName,
-            avatarUrl: '/static/image/im_server_avatar.png'
+            avatarUrl: require('../../assets/image/im_server_avatar.png')
         }
     },
 

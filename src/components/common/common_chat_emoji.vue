@@ -67,7 +67,7 @@ export default {
          * @param {String} faceName face名称
          */
         getImgByFaceName: function(faceName) {
-            var imgStr = '<img class="qqemoji small qqemoji@faceIndex" text="@faceName" src="/static/image/im_emoji_spacer.gif"/>';
+            var imgStr = '<img class="qqemoji small qqemoji@faceIndex" text="@faceName" src="/src/assets/image/im_emoji_spacer.gif"/>';
             var faceIndex = 0;
             for (var i = 0; i < this.$data.qqemojiList.length; i++) {
                 if (this.$data.qqemojiList[i] == faceName) {
