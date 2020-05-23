@@ -33,7 +33,9 @@ export default {
     },
     methods: {
         regSocket() {
-            this.socket = new WebSocket("ws://192.168.199.233:8088/community/socket/" + 9527);
+            const token = this.getCookie('EL-ADMIN-TOEKN')
+            console.log(token)
+            this.socket = new WebSocket("ws://127.0.0.1:8088/community/socket/" + token)
 			this.socket.onopen = this.websocketonopen
 			this.socket.onerror = this.websocketonerror
 			this.socket.onmessage = this.websocketonmessage
@@ -59,6 +61,17 @@ export default {
 		},              
 		websocketclose: function (e) {
 			console.log("connection closed ")
+        },
+        getCookie(key) {
+            const name = key + "="
+            var cookies = document.cookie.split(';')
+            for(var i=0; i<cookies.length; i++) {
+                var c = cookies[i].trim()  
+                if (c.indexOf(name) === 0) {
+                    return c.substring(name.length, c.length)
+                }
+            }
+            return ""     
         }
     },
     destroyed() {
